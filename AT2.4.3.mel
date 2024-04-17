@@ -532,7 +532,7 @@ $object = `button -command "graphEditorViz ()" -backgroundColor 0.043 0.365 0.47
 formLayout -edit -attachForm $object "top" 130 -attachForm $object "left" 94 $form;
 //=========================================
 //create follow
-$object = `button -command "follow()" -backgroundColor 0.157 0.45 0.573 -label "follow" -w 164 -h 34`;//0.157 0.404 0.573  0.588 0.674 0.765
+$object = `button -command "follow()" -backgroundColor 0.157 0.45 0.573 -label "Follow" -w 164 -h 34`;//0.157 0.404 0.573  0.588 0.674 0.765
                 popupMenu;
                     menuItem -label "set" -c "setCon()";
                     menuItem -label "bake" -c "bakeCon()";
