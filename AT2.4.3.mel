@@ -615,7 +615,6 @@ window -edit -widthHeight 188.0 352.0 "mainWindow";
 ///////////////////////////////////////////AUTO IKFK
 global proc Auto_IKFK(){
     python("import AUTO_IKFK");
-    python("reload(AUTO_IKFK)");
     python("AUTO_IKFK.FkIk_UI()");
 }
 ////////////////////////////////////////////////////
