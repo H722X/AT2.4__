@@ -532,7 +532,7 @@ $object = `button -command "graphEditorViz ()" -backgroundColor 0.043 0.365 0.47
 formLayout -edit -attachForm $object "top" 130 -attachForm $object "left" 94 $form;
 //=========================================
 //create follow
-$object = `button -command "follow()" -backgroundColor 0.157 0.404 0.573 -label "follow" -w 164 -h 34`;//0.157 0.404 0.573  0.588 0.674 0.765
+$object = `button -command "follow()" -backgroundColor 0.157 0.45 0.573 -label "follow" -w 164 -h 34`;//0.157 0.404 0.573  0.588 0.674 0.765
                 popupMenu;
                     menuItem -label "set" -c "setCon()";
                     menuItem -label "bake" -c "bakeCon()";
@@ -542,7 +542,7 @@ $object = `button -command "follow()" -backgroundColor 0.157 0.404 0.573 -label 
 formLayout -edit -attachForm $object "top" 168 -attachForm $object "left" 10 $form;
 
 //Auto IKFK
-$object = `button -command "Auto_IKFK()" -backgroundColor 0.043 0.365 0.475 -label "AUTO IKFK" -w 164 -h 34`;
+$object = `button -command "Auto_IKFK()" -backgroundColor 0.4 0.6 0.72 -label "AUTO IKFK" -w 164 -h 34`;
 formLayout -edit -attachForm $object "top" 206 -attachForm $object "left" 10 $form;
   
 //$object = `separator -w 122 -h 8`;
