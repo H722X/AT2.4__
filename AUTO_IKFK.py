@@ -635,7 +635,7 @@ class FkIk_UI:
         jointsList_LR_part = {'L': {'arm': {'FK1': '', 'FK2': '', 'FK3': ''}, 'leg': {'FK1': '', 'FK2': '', 'FK3': ''}},
                               'R': {'arm': {'FK1': '', 'FK2': '', 'FK3': ''}, 'leg': {'FK1': '', 'FK2': '', 'FK3': ''}}
                               }
-        joints_remove = ['bend', 'twist', 'stretch', 'backPsd', 'lowPsd', 'forwardPsd', 'upPsd']
+        joints_remove = ['bend', 'twist', 'stretch', 'backPsd', 'lowPsd', 'forwardPsd', 'upPsd', 'slider']
         part_re = []
         for i in alljointsList:
             i = str(i)
@@ -676,8 +676,8 @@ class FkIk_UI:
                                                 arm_leg_part = part
                                                 part_ = key
                                                 part_FK = part
-                                        if len(i) < len(jointsList_LR_part[[i for i in L_R.split('_') if i][0]][key][part]):
-                                            if not False in [ii in jointsList_LR_part[[i for i in L_R.split('_') if i][0]][key][part].split('_') for ii in i.split('_')]:
+                                        if len(i) < len(jointsList_LR_part[[i for i in L_R.split('_') if i][0].upper()][key][part]):
+                                            if not False in [ii in jointsList_LR_part[[i for i in L_R.split('_') if i][0].upper()][key][part].split('_') for ii in i.split('_')]:
                                                 arm_leg_part = part
                                                 part_ = key
                                                 part_FK = part
@@ -689,12 +689,12 @@ class FkIk_UI:
                                         # print('joint::::::::::', key + '_' + part + '_' + L_R, '===========', i)
 
                     if arm_leg_part:
-                        if 'L' in L_R:
+                        if 'L' in L_R.upper():
                             for part in jointsList_LR_part['L']:
                                 for FK_part in jointsList_LR_part['L'][part]:
                                     if part == part_ and FK_part == part_FK:
                                         jointsList_LR_part['L'][part][FK_part] = i
-                        elif 'R' in L_R:
+                        elif 'R' in L_R.upper():
                             for part in jointsList_LR_part['R']:
                                 for FK_part in jointsList_LR_part['R'][part]:
                                     if part == part_ and FK_part == part_FK:
