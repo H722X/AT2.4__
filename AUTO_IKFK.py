@@ -635,7 +635,7 @@ class FkIk_UI:
         jointsList_LR_part = {'L': {'arm': {'FK1': '', 'FK2': '', 'FK3': ''}, 'leg': {'FK1': '', 'FK2': '', 'FK3': ''}},
                               'R': {'arm': {'FK1': '', 'FK2': '', 'FK3': ''}, 'leg': {'FK1': '', 'FK2': '', 'FK3': ''}}
                               }
-        joints_remove = ['bend', 'twist', 'stretch', 'backPsd', 'lowPsd', 'forwardPsd', 'upPsd', 'slider']
+        joints_remove = ['bend', 'twist', 'stretch', 'backPsd', 'lowPsd', 'forwardPsd', 'upPsd', 'slider', 'slide']
         part_re = []
         for i in alljointsList:
             i = str(i)
@@ -650,6 +650,7 @@ class FkIk_UI:
                         re.findall(r":(L_).*|^(L_).*|.*(_L)$|.*?(_L_)|:(R_).*|^(R_).*|.*(_R)$|.*?(_R_)", str(i), re.I))
                     if L_R_list:
                         L_R = list(filter(None, L_R_list[0]))[0]
+                        L_R = re.sub('[^a-zA-Z]', '', L_R)
 
                     if ':' in i:
                         i_ = i.replace(':', '_')
@@ -663,21 +664,24 @@ class FkIk_UI:
                                     if (key + '_' + part + '_' + L_R) in part_re:
                                         if part == 'FK1':
                                             if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                arm_leg_part = part
-                                                part_ = key
-                                                part_FK = part
+                                                if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    arm_leg_part = part
+                                                    part_ = key
+                                                    part_FK = part
                                         if part == 'FK2':
                                             if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                arm_leg_part = part
-                                                part_ = key
-                                                part_FK = part
+                                                if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    arm_leg_part = part
+                                                    part_ = key
+                                                    part_FK = part
                                         if part == 'FK3':
                                             if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                arm_leg_part = part
-                                                part_ = key
-                                                part_FK = part
-                                        if len(i) < len(jointsList_LR_part[[i for i in L_R.split('_') if i][0].upper()][key][part]):
-                                            if not False in [ii in jointsList_LR_part[[i for i in L_R.split('_') if i][0].upper()][key][part].split('_') for ii in i.split('_')]:
+                                                if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    arm_leg_part = part
+                                                    part_ = key
+                                                    part_FK = part
+                                        if len(i) < len(jointsList_LR_part[L_R][key][part]):
+                                            if not False in [ii in jointsList_LR_part[L_R][key][part].split('_') for ii in i.split('_')]:
                                                 arm_leg_part = part
                                                 part_ = key
                                                 part_FK = part
@@ -953,6 +957,7 @@ class FkIk_UI:
         time_range = pm.mel.eval('global string $gPlayBackSlider; timeControl -ra -q $gPlayBackSlider;')
         if sel:
             data_list = self.take_data(selected=sel, data_type='list')
+            # keys_switch = pm.keyframe(data_list[6], query=True)
             frames = pm.keyframe(sel, query=True, timeChange=True)
             frames = (list(dict.fromkeys(frames)))
             frames.sort()
@@ -960,10 +965,11 @@ class FkIk_UI:
             startTime = time.time()
             if time_range[1] - time_range[0] > 1:
                 pm.progressBar(gMainProgressBar, edit=True, max=len([i for i in frames if time_range[0] <= i <= time_range[1]]))
+                # if len(keys_switch) > 1:
                 for frame in frames:
-                    if time_range[0] <= frame <= time_range[1]:
-                        pm.currentTime(frame)
-                        pm.setKeyframe(data_list[5])
+                        if time_range[0] <= frame <= time_range[1]:
+                            pm.currentTime(frame)
+                            pm.setKeyframe(data_list[5])
                 for frame in frames:
                     if not pm.progressBar(gMainProgressBar, query=True, isCancelled=True):
                         if time_range[0] <= frame <= time_range[1]:
@@ -987,10 +993,11 @@ class FkIk_UI:
                 min = pm.playbackOptions(query=True, min=True)
                 max = pm.playbackOptions(query=True, max=True)
                 pm.progressBar(gMainProgressBar, edit=True, max=len([i for i in frames if min <= i <= max]))
+                # if len(keys_switch) > 1:
                 for frame in frames:
-                    if min <= frame <= max:
-                        pm.currentTime(frame)
-                        pm.setKeyframe(data_list[5])
+                        if min <= frame <= max:
+                            pm.currentTime(frame)
+                            pm.setKeyframe(data_list[5])
                 for frame in frames:
                     if not pm.progressBar(gMainProgressBar, query=True, isCancelled=True):
                         if min <= frame <= max:
