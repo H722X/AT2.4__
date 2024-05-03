@@ -6,7 +6,7 @@ import logging
 import re
 import math
 import sys
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(10000)
 
 
 debug = False
@@ -310,6 +310,7 @@ class FkIk_UI:
         global vis
         global num
         num += 1
+        num_limit = 500
         connect_attr = pm.listConnections(obj, p=True, s=False, scn=True)
         if connect_attr:
             for attr in connect_attr:
@@ -317,14 +318,14 @@ class FkIk_UI:
                 if pm.objectType(attr) == 'transform':
                     if name_attr[1] == 'visibility':
                         vis.append(name_attr[0])
-                    if num < 3000:
+                    if num < num_limit:
                         self.query_connect_ctrl(name_attr[0])
                 elif pm.objectType(attr) == 'joint':
                     if name_attr[1] == 'visibility':
                         vis.append(name_attr[0])
                 else:
                     if pm.attributeQuery('output', node=name_attr[0], exists=True):
-                        if num < 3000:
+                        if num < num_limit:
                             self.query_connect_ctrl(name_attr[0])
 
     # 自动化获取相关对象及属性:FK1,FK2,FK3,IK Ctrl,IK Pole,switchCtrl, switchAttr,switch0isfk, switchAttrRange, rotOffset, bendKneeAxis, [joint], [joint_offset]
@@ -1111,11 +1112,11 @@ class manual_adaptation:
         pm.textField(win_hand + 'arm_switch_R', text='')
         pm.button(label='< switchCtrl', c=lambda a: self.inputSelTfb("arm_switch_R"))
 
-        pm.button(label='switchAttr >', c=lambda a: self.inputSelTfb("arm_switchAttr_L"))
+        pm.button(label='switchAttr >', c=lambda a: self.inputSelAttr("arm_switchAttr_L"))
         pm.textField(win_hand + 'arm_switchAttr_L', text='')
         pm.separator(w=10)
         pm.textField(win_hand + 'arm_switchAttr_R', text='')
-        pm.button(label='< switchAttr', c=lambda a: self.inputSelTfb("arm_switchAttr_R"))
+        pm.button(label='< switchAttr', c=lambda a: self.inputSelAttr("arm_switchAttr_R"))
 
         pm.button(label=' Joint_fk1 >', c=lambda a: self.inputSelTfb("arm_Jfk1_L"))
         pm.textField(win_hand + 'arm_Jfk1_L', text='')
@@ -1180,11 +1181,11 @@ class manual_adaptation:
         pm.textField(win_hand + 'leg_switch_R', text='')
         pm.button(label='< switchCtrl', c=lambda a: self.inputSelTfb("leg_switch_R"))
 
-        pm.button(label='switchAttr >', c=lambda a: self.inputSelTfb("leg_switchAttr_L"))
+        pm.button(label='switchAttr >', c=lambda a: self.inputSelAttr("leg_switchAttr_L"))
         pm.textField(win_hand + 'leg_switchAttr_L', text='')
         pm.separator(w=10)
         pm.textField(win_hand + 'leg_switchAttr_R', text='')
-        pm.button(label='< switchAttr', c=lambda a: self.inputSelTfb("leg_switchAttr_R"))
+        pm.button(label='< switchAttr', c=lambda a: self.inputSelAttr("leg_switchAttr_R"))
 
         pm.button(label=' Joint_fk1 >', c=lambda a: self.inputSelTfb("leg_Jfk1_L"))
         pm.textField(win_hand + 'leg_Jfk1_L', text='')
@@ -1206,6 +1207,7 @@ class manual_adaptation:
         pm.setParent(win_hand + "mainColumnLayout")
 
         pm.rowColumnLayout(win_hand + "L_R", numberOfColumns=2, columnWidth=[(1, 240), (2, 240)])
+        pm.textFieldButtonGrp(win_hand + 'nameSpace', label='', text='', cw3=(0, 140, 100), ad2=1, buttonLabel='AddNameSpace', bc=lambda: self.nameSpace_replace())
         pm.button(label='L > R', c=lambda a: self.L_R_Match())
         pm.setParent(win_hand + "mainColumnLayout")
 
@@ -1242,6 +1244,13 @@ class manual_adaptation:
                             pm.textField(win_hand + arm_or_leg + '_' + ikfk + '_R', e=True, text=R_text)
                         else:
                             pm.displayInfo('object not exist: ' + R_text)
+
+    @staticmethod
+    def inputSelAttr(name):
+        sel = pm.selected()
+        attr = pm.channelBox("mainChannelBox", query=True, selectedMainAttributes=True)
+        if attr:
+            pm.textField(win_hand + name, e=1, tx=sel[0] + '.' + attr[0])
 
     @staticmethod
     def inputSelTfb(name):
@@ -1401,6 +1410,8 @@ class manual_adaptation:
             inputValues[13] = [j_offset_ik1, j_offset_ik2]
 
             return inputValues
+        else:
+            return []
 
     @staticmethod
     def loc_create2(obj):
@@ -1464,8 +1475,40 @@ class manual_adaptation:
                             pm.displayInfo('Successfully Match !')
             else:
                 pm.warning('Failed Match !')
+        else:
+            pm.warning('Please select one Ctrl !')
         pm.select(sel)
         FkIk_UI.color_text(FkIk_UI())
+
+    def nameSpace_replace(self):
+        nameSpace_replace = pm.textFieldButtonGrp(win_hand + 'nameSpace', q=True, tx=True)
+        if nameSpace_replace:
+            for arm_or_leg in ['arm_', 'leg_']:
+                for L_R in ['_L', '_R']:
+                    for ikfk in ['fk1', 'fk2', 'fk3', 'ik1', 'ik2', 'switch', 'switchAttr', 'Jfk1', 'Jfk2', 'Jfk3']:
+                        text_get = pm.textField(win_hand + arm_or_leg + ikfk + L_R, q=1, tx=1)
+                        if text_get:
+                            if ':' in text_get:
+                                if nameSpace_replace == '/':
+                                    text_new = text_get.split(':')[1]
+                                    if pm.objExists(text_new):
+                                        pm.textField(win_hand + arm_or_leg + ikfk + L_R, e=1, tx=text_new)
+                                    else:
+                                        pm.warning(text_new + ' not exist !')
+                                else:
+                                    text_new = nameSpace_replace + ':' + text_get.split(':')[1]
+                                    if pm.objExists(text_new):
+                                        pm.textField(win_hand + arm_or_leg + ikfk + L_R, e=1, tx=text_new)
+                                    else:
+                                        pm.warning(text_new + ' not exist !')
+                            else:
+                                if nameSpace_replace != '/':
+                                    text_new = nameSpace_replace + ':' + text_get
+                                    if pm.objExists(text_new):
+                                        pm.textField(win_hand + arm_or_leg + ikfk + L_R, e=1, tx=text_new)
+                                    else:
+                                        pm.warning(text_new + ' not exist !')
+
 
 # IK对齐FK,转成IK
 def fkikMatch(fkwrist, fkellbow, fkshldr, ikwrist, ikpv, switchCtrl, switchAttr, switch0isfk=1, switchAttrRange=1,
