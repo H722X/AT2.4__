@@ -2055,10 +2055,12 @@ def ikfkMatch_jointMode(FK1, FK2, FK3, switchCtrl, switchAttr, switch0isfk=1, sw
     # 大臂在axial轴向转动-获取的axial轴向的数值
     if abs(offset) > 0.001:
         if abs(offset) > 90:
-            if offset > 0:
-                offset = offset - 180
-            elif offset < 0:
-                offset = offset + 180
+            fk1_r = pm.getAttr(FK1 + '.rotate' + axial)
+            if abs(fk1_r) > 90:
+                if offset > 0:
+                    offset = offset - 180
+                elif offset < 0:
+                    offset = offset + 180
         if axial == 'X':
             pm.rotate(FK1, [0 - offset, 0, 0], r=True, os=True)
         elif axial == 'Y':
