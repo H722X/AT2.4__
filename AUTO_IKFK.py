@@ -680,32 +680,32 @@ class FkIk_UI:
                                 if part != 'IK1' and part != 'IK2':
                                     if True in [x.upper() in [(i_.split('_')[y_i-1] + '_' + y).upper() if y.isdigit() else y.upper() for y_i, y in enumerate(i_.split('_'))] for x in
                                                 self.CTRL_NAME_INI[key][part]]:
-                                        if (key + '_' + part + '_' + L_R) in part_re:
+                                        if (key + '_' + part + '_' + L_R.upper()) in part_re:
                                             if part == 'FK1':
                                                 if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R.upper()][key][part].upper():
                                                         arm_leg_part = part
                                                         part_ = key
                                                         part_FK = part
                                             if part == 'FK2':
                                                 if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R.upper()][key][part].upper():
                                                         arm_leg_part = part
                                                         part_ = key
                                                         part_FK = part
                                             if part == 'FK3':
                                                 if True in [x.upper() in [y.upper() for y in i_.split('_')] for x in self.CTRL_NAME_INI[key][part][0:1]]:
-                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R][key][part].upper():
+                                                    if self.CTRL_NAME_INI[key][part][0].upper() not in jointsList_LR_part[L_R.upper()][key][part].upper():
                                                         arm_leg_part = part
                                                         part_ = key
                                                         part_FK = part
-                                            if len(i) < len(jointsList_LR_part[L_R][key][part]):
-                                                if not False in [ii in jointsList_LR_part[L_R][key][part].split('_') for ii in i.split('_')]:
+                                            if len(i) < len(jointsList_LR_part[L_R.upper()][key][part]):
+                                                if not False in [ii in jointsList_LR_part[L_R.upper()][key][part].split('_') for ii in i.split('_')]:
                                                     arm_leg_part = part
                                                     part_ = key
                                                     part_FK = part
-                                        if (key + '_' + part + '_' + L_R) not in part_re:
-                                            part_re.append(key + '_' + part + '_' + L_R)
+                                        if (key + '_' + part + '_' + L_R.upper()) not in part_re:
+                                            part_re.append(key + '_' + part + '_' + L_R.upper())
                                             arm_leg_part = part
                                             part_ = key
                                             part_FK = part
