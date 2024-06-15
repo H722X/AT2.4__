@@ -381,7 +381,7 @@ global proc graphEditorViz ()
           setParent ..;
           
             // Add additional controls to the window
-            string $row = `rowLayout -numberOfColumns 17`;
+            string $row = `rowLayout -numberOfColumns 50`;
             global string $toggleButton[];
 
               $toggleButton[0] = `button -command "curveSelection(\"translateX\", 0)" -backgroundColor 0.812 0.172 0.396 -label "tX"`;   
@@ -399,6 +399,24 @@ global proc graphEditorViz ()
               button -command "clearFilters" -backgroundColor 0.839 0.839 0.839 -label "CLEAR";
               text -label "      " -w 30;
               button -command filterCurve -label "EulerFilter";
+              text -label "      " -w 30;
+              string $b_ST = `button -command "" -label "ScaleTime"`;
+              text -label "—";
+              text -label "P";
+              string $P = `textField -it "0" -w 32`;
+              text -label "—";
+              text -label "S";
+              string $S = `textField -it "-1" -w 32`;
+              text -label "—";
+              string $b_SV = `button -command "" -label "ScaleValue"`;
+                                    popupMenu;
+                                        radioMenuItemCollection;
+                                            menuItem  -label "timeValueMode" -rb on;
+                                            menuItem  -label "averageMode" -rb off averageMode_Box;
+                                        menuItem  -label "AutoScale" -c ("AutoScale_Value(\"" + $S + "\")");
+
+              button -e -c ("ScaleTime_F(\""+ $P + "\"" + "," + "\"" + $S + "\")") $b_ST;
+              button -e -c ("ScaleValue_F(\""+ $P + "\"" + "," + "\"" + $S + "\")") $b_SV;
               clearFilters ();
               setParent ..;
         
@@ -578,6 +596,8 @@ $object = `button -p $form2 -command "bindControlsAll" -backgroundColor 0.3 0.3 
 formLayout -edit -attachForm $object "top" 0 -attachForm $object "left" 10 $form2;
 //
 $object = `button -p $form2 -command "clearBind" -backgroundColor 0.3 0.3 0.3 -label "Bake" -w 39 -h 34`;
+                popupMenu;
+                        menuItem -label "keepOutRangeKeys" -cb off keepOutRangeKeys_CheckBox;
 formLayout -edit -attachForm $object "top" 0 -attachForm $object "left" 136 $form2;
 //
 $object = `button -p $form2 -command "selectPlus" -backgroundColor 0.3 0.3 0.3 -label "sel+" -w 39 -h 34`;
@@ -1618,26 +1638,12 @@ global proc qDistance(string $start, string $end)
 
 }
 ///////////////////////////////////////////////////////////////////////////////////
-global proc clear_houzhui(string $sel)
-{
-    string $cache[];
-    int $n = `tokenize $sel "_" $cache`;
-    int $c;
-    string $name1;
-    for($c=0;$c < ($n-1);$c++)
-    {
-        if($c == 0)
-        {
-            $name1 = $cache[0];
-        }
-        else
-        {
-            $name1 = $name1 + "_" + $cache[$c];
-        }
-    }
-    //print $name1;
-    //return;
-    select $name1;
+global proc clear_houzhui(string $sel){
+    string $obj_attr[];
+    tokenize $sel "_" $obj_attr;
+    string $attr = $obj_attr[`size $obj_attr`-1];
+    string $obj = `substitute ("_"+$attr) $sel ""`;
+    select $obj;
 }
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1650,7 +1656,6 @@ global proc M(string $m)//选择_后缀匹配的对象
     string $B[];
     for($i in $A)
     {
-
        if( `match $m $i` == $m)
         { 
          $B[$c] = $i;
@@ -2082,7 +2087,8 @@ global proc clearBind()
             $ctrlList[$c] = $temp[0];
             $c++;
         }
-        bakeResults -t ($startFrame+":"+$endFrame)  -preserveOutsideKeys on $ctrlList;
+        int $outsideKeys = `menuItem -q -checkBox keepOutRangeKeys_CheckBox`;
+        bakeResults -t ($startFrame+":"+$endFrame)  -preserveOutsideKeys $outsideKeys $ctrlList;
 
         delete $proxyJointLst;
         if(`size $T` == 0)
@@ -2140,6 +2146,55 @@ global proc clearFilters ()
         }
     }
     
+}
+
+global proc ScaleTime_F(string $P, string $S){
+    float $P_f = float(`textField -q -tx $P`);
+    float $S_f = float(`textField -q -tx $S`);
+    scaleKey -iub false -ts $S_f -tp $P_f -fs $S_f -fp $P_f -vs 1 -vp 0 ;
+}
+
+global proc ScaleValue_F(string $P, string $S){
+    float $P_f = float(`textField -q -tx $P`);
+    float $S_f = float(`textField -q -tx $S`);
+    scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $P_f -animation keys ;
+}
+
+global proc AutoScale_Value(string $S){
+    float $S_f = float(`textField -q -tx $S`);
+    // 获取当前选择的动画曲线
+    string $selectedAnimationCurves[] = `keyframe -q -sl -n`;
+    // 获取选择时间范围
+    float $time_change[] = `keyframe -q -sl -timeChange $selectedAnimationCurves[0]`;
+    int $size_end = `size $time_change` - 1;
+    string $time_range = $time_change[0] + ":" + $time_change[$size_end];
+
+    for ($curve in $selectedAnimationCurves) {
+        selectKey -t $time_range $curve;
+        if(`menuItem -q -radioButton averageMode_Box` == 1){
+            //求平均值
+            float $value_change[] = `keyframe -q -sl -valueChange $curve`;
+            float $v;
+            float $sum = 0;
+            for($v in $value_change){
+                $sum = $sum +$v;
+            }
+            int $length = `size $value_change`;
+            float $average = $sum/$length;
+            scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $average -animation keys ;
+        }
+        else{
+            string $obj_attr[];
+            tokenize $curve "_" $obj_attr;
+            string $attr = $obj_attr[`size $obj_attr`-1];
+            stringArrayRemoveAtIndex((`size $obj_attr`-1), $obj_attr);
+            string $obj = stringArrayToString($obj_attr, "_");
+            //动画曲线在当前时间的数值
+            float $valueAtFrame00 = `getAttr ($obj +"."+ $attr)`;
+            scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $valueAtFrame00 -animation keys ;
+        }
+    
+    }
 }
 ///////////////////////////////////////////////////////////////////////////
 animationToolUI
