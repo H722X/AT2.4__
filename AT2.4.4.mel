@@ -2190,7 +2190,13 @@ global proc AutoScale_Value(string $S){
             stringArrayRemoveAtIndex((`size $obj_attr`-1), $obj_attr);
             string $obj = stringArrayToString($obj_attr, "_");
             //动画曲线在当前时间的数值
-            float $valueAtFrame00 = `getAttr ($obj +"."+ $attr)`;
+            float $valueAtFrame00;
+            string $spaceName[] = `ls -sns ("*:" + $obj)`;
+            if(`size $spaceName` == 0){
+            $valueAtFrame00 = `getAttr ($obj +"."+ $attr)`;}
+            else if(`size $spaceName` == 2){
+            $valueAtFrame00 = `getAttr ($spaceName[1] + ":" + $obj +"."+ $attr)`;}
+            else{error "Try just ref one character ! ! !";}
             scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $valueAtFrame00 -animation keys ;
         }
     
