@@ -2184,19 +2184,9 @@ global proc AutoScale_Value(string $S){
             scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $average -animation keys ;
         }
         else{
-            string $obj_attr[];
-            tokenize $curve "_" $obj_attr;
-            string $attr = $obj_attr[`size $obj_attr`-1];
-            stringArrayRemoveAtIndex((`size $obj_attr`-1), $obj_attr);
-            string $obj = stringArrayToString($obj_attr, "_");
+            string $attr[] = `listConnections -source false -destination true -plugs true $curve`;
             //动画曲线在当前时间的数值
-            float $valueAtFrame00;
-            string $spaceName[] = `ls -sns ("*:" + $obj)`;
-            if(`size $spaceName` == 0){
-            $valueAtFrame00 = `getAttr ($obj +"."+ $attr)`;}
-            else if(`size $spaceName` == 2){
-            $valueAtFrame00 = `getAttr ($spaceName[1] + ":" + $obj +"."+ $attr)`;}
-            else{error "Try just ref one character ! ! !";}
+            float $valueAtFrame00 = `getAttr ($attr[0])`;
             scaleKey -iub false -ts 1 -tp 0 -fs 1 -fp 0 -vs $S_f -vp $valueAtFrame00 -animation keys ;
         }
     
