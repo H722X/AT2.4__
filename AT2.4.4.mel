@@ -602,6 +602,7 @@ formLayout -edit -attachForm $object "top" 0 -attachForm $object "left" 136 $for
 //
 $object = `button -p $form2 -command "selectPlus" -backgroundColor 0.3 0.3 0.3 -label "sel+" -w 39 -h 34`;
                     popupMenu;
+                                menuItem  -label "sel-" -c "sel_minus";
                                 menuItem  -label "Ctrl->Joint" -c "sel_COJ"; 
                                 menuItem  -label "Joint->Ctrl" -c "sel_JOC";
                                 menuItem  -label "straight" -c "straight";
@@ -1087,8 +1088,12 @@ global proc switchInside()
 
 }
 //////////////////////////////////////////////////////
-
-/////
+//减选子级控制器
+global proc sel_minus(){
+    string $sel[] = `ls -sl`;
+    dropTail($sel);
+}
+////////
 
 global proc straight()
 {
